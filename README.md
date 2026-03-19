@@ -127,7 +127,7 @@ python3 app.py
 ## Project structure
 
 ```text
-pro-drama-script-generator/
+ShakeDrama/
 ├── app.py
 ├── run_local.sh
 ├── .env.example
