@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Runtime data
+users.json
+llm_profiles.json
+web_projects/
+output/
+
+# Logs and local files
+*.log
+.DS_Store
+
+# IDE / editor
+.vscode/
+.idea/

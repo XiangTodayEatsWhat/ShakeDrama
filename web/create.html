@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新建剧本任务 - 专业级标准化格式剧本生成</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Poppins:wght@400;500&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/css/main.css" rel="stylesheet">
+  <style>
+    /* 确保header固定在顶部 */
+    #header {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 1000 !important;
+    }
+    
+    /* 为main添加顶部padding，避免被header遮挡 */
+    .main {
+      padding-top: 140px !important;
+    }
+    
+    /* 自定义下拉框样式 */
+    .form-group select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: white;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23313131' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 20px;
+      padding-right: 40px !important;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid rgba(102, 102, 102, 0.15);
+      font-weight: 500;
+      color: #313131;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+    
+    .form-group select:hover {
+      border-color: var(--accent-color);
+      background-color: #fafafa;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      transform: translateY(-1px);
+    }
+    
+    .form-group select:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 4px rgba(49, 49, 49, 0.08), 0 4px 12px rgba(0, 0, 0, 0.1);
+      background-color: white;
+      outline: none;
+      transform: translateY(-1px);
+    }
+    
+    .form-group select:active {
+      transform: translateY(0);
+    }
+    
+    .form-group select option {
+      padding: 12px 16px;
+      font-size: 15px;
+      color: #313131;
+      background-color: white;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+    
+    .form-group select option:hover {
+      background: linear-gradient(90deg, rgba(49, 49, 49, 0.05) 0%, rgba(49, 49, 49, 0.02) 100%);
+    }
+    
+    /* 为选中的option添加样式 */
+    .form-group select option:checked {
+      background: linear-gradient(90deg, var(--accent-color) 0%, rgba(49, 49, 49, 0.9) 100%);
+      color: white;
+      font-weight: 600;
+    }
+    
+    /* 数字输入框样式优化 */
+    .form-group input[type="number"] {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      font-weight: 500;
+    }
+    
+    .form-group input[type="number"]:hover {
+      border-color: var(--accent-color);
+      background-color: #fafafa;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      transform: translateY(-1px);
+    }
+    
+    .form-group input[type="number"]:focus {
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 4px rgba(49, 49, 49, 0.08), 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-group input[type="number"]:active {
+      transform: translateY(0);
+    }
+    
+    /* 文本域样式优化 */
+    .form-group textarea {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      resize: vertical;
+      min-height: 120px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      font-weight: 400;
+      line-height: 1.6;
+    }
+    
+    .form-group textarea:hover {
+      border-color: var(--accent-color);
+      background-color: #fafafa;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      transform: translateY(-1px);
+    }
+    
+    .form-group textarea:focus {
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 4px rgba(49, 49, 49, 0.08), 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-group textarea:active {
+      transform: translateY(0);
+    }
+    
+    /* Label样式增强 */
+    .form-group label {
+      font-weight: 600;
+      color: #313131;
+      margin-bottom: 8px;
+      display: block;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+    }
+    
+    /* 表单分组标题 */
+    .form-section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #313131;
+      margin: 32px 0 20px 0;
+      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(102, 102, 102, 0.1);
+    }
+    
+    /* 提交按钮增强 */
+    .submit-btn {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .submit-btn:active {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .submit-btn:disabled {
+      transform: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    /* 输入框placeholder样式 */
+    .form-group input::placeholder,
+    .form-group textarea::placeholder,
+    .form-group select::placeholder {
+      color: rgba(49, 49, 49, 0.4);
+      font-weight: 400;
+    }
+    
+    /* 焦点时的标签动画 */
+    .form-group:focus-within label {
+      color: var(--accent-color);
+      transform: translateX(2px);
+      transition: all 0.3s ease;
+    }
+    
+    /* 表单消息提示 */
+    .form-message {
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      display: none;
+      animation: fadeInDown 0.3s ease;
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .form-message.loading {
+      background: linear-gradient(135deg, #313131 0%, #4a4a4a 100%);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 4px 15px rgba(49, 49, 49, 0.5);
+    }
+    
+    .form-message.loading::before {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .form-message.success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: #ffffff;
+      display: block;
+      box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+    }
+    
+    .form-message.error {
+      background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+      color: #ffffff;
+      display: block;
+      box-shadow: 0 4px 15px rgba(235, 51, 73, 0.3);
+    }
+  </style>
+</head>
+<body class="index-page">
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="/projects" class="logo d-flex align-items-center">
+        <h1 class="sitename">专业级标准化格式剧本生成</h1>
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="/projects">项目</a></li>
+          <li><a href="/create" class="active">新建</a></li>
+          <li><a href="#" onclick="localStorage.removeItem('auth_token');window.location.href='/login.html';return false;" style="color:#dc3545;">退出</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section id="create" class="contact section light-background">
+      <div class="container section-title" data-aos="fade-up">
+        <span class="subtitle">Create</span>
+        <h2>新建剧本任务</h2>
+        <p>先选择已配置好的模型接口方案，再输入需求，系统将按标准化生成流程产出短剧剧本。</p>
+      </div>
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="form-wrapper">
+              <div class="form-header">
+                <h3>基本信息</h3>
+              </div>
+
+              <form id="createForm" class="create-form">
+                <div id="formMessage" class="form-message" role="alert"></div>
+
+                <div class="form-group">
+                  <label for="user_idea">生成提示词 (Prompt) *</label>
+                  <textarea name="user_idea" id="user_idea" rows="5" required placeholder="输入生成内容的描述和要求…"></textarea>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="total_episodes">生成数量 *</label>
+                      <input type="number" name="total_episodes" id="total_episodes" min="5" max="100" value="80" step="5" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="target_audience">目标受众</label>
+                      <select name="target_audience" id="target_audience">
+                        <option value="通用">通用</option>
+                        <option value="女频">女频</option>
+                        <option value="男频">男频</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <h4 class="form-section-title">高级选项</h4>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="batch_size">批次大小</label>
+                      <input type="number" name="batch_size" id="batch_size" min="1" max="10" value="5">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="sample_strategy">流程策略</label>
+                      <select name="sample_strategy" id="sample_strategy">
+                        <option value="auto">标准流程</option>
+                        <option value="none">关闭样本</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <label for="provider">接口配置方案</label>
+                      <div style="display:flex;gap:12px;align-items:center;">
+                        <select name="provider" id="provider" style="flex:1;">
+                          <option value="wlai">加载中...</option>
+                        </select>
+                        <button type="button" class="btn btn-outline-dark" id="addModelBtn" style="height:42px;white-space:nowrap;flex-shrink:0;">
+                          <i class="bi bi-plus-lg"></i> 新增配置
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                  <span>创建项目</span>
+                  <i class="bi bi-arrow-right"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer" class="footer dark-background">
+    <div class="container copyright text-center mt-4">
+      <p>© <span>2026</span> <strong class="px-1 sitename">短剧剧本</strong> <span>AIGC 多智能体协作</span></p>
+    </div>
+  </footer>
+
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/js/modal.js"></script>
+  <script>
+    // Token验证
+    function checkAuth() {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        window.location.href = '/login.html';
+        return false;
+      }
+      return true;
+    }
+    
+    // 页面加载时验证token
+    if (!checkAuth()) {
+      throw new Error('未授权访问');
+    }
+    
+    AOS.init({ duration: 600, easing: 'ease-in-out', once: true, mirror: false });
+
+    // 动态加载模型列表
+    async function loadModels() {
+      var token = localStorage.getItem('auth_token');
+      try {
+        var resp = await fetch('/api/models', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!resp.ok) return;
+        var models = await resp.json();
+        var sel = document.getElementById('provider');
+        sel.innerHTML = '';
+        if (!models || models.length === 0) {
+          var emptyOpt = document.createElement('option');
+          emptyOpt.value = '';
+          emptyOpt.textContent = '请先新增接口配置方案';
+          sel.appendChild(emptyOpt);
+          return;
+        }
+        models.forEach(function(m) {
+          var opt = document.createElement('option');
+          opt.value = m.id;
+          opt.textContent = m.name + (m.model ? '（' + m.model + '）' : '');
+          sel.appendChild(opt);
+        });
+      } catch(e) { console.error('加载模型失败', e); }
+    }
+    loadModels();
+
+    // 新增配置弹窗
+    document.getElementById('addModelBtn').addEventListener('click', async function() {
+      var html = '<div style="display:flex;flex-direction:column;gap:14px;">'
+        + '<div style="display:flex;flex-direction:column;gap:6px;">'
+        + '<div style="font-size:13px;font-weight:600;color:#334155;">配置名称</div>'
+        + '<input id="_am_name" placeholder="例：火山方舟" style="padding:10px 14px;border:1px solid #ddd;border-radius:6px;font-size:14px;">'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:6px;">'
+        + '<div style="font-size:13px;font-weight:600;color:#334155;">API Key</div>'
+        + '<input id="_am_key" placeholder="例：你的接口密钥" style="padding:10px 14px;border:1px solid #ddd;border-radius:6px;font-size:14px;">'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:6px;">'
+        + '<div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#334155;">'
+        + '<span>Base URL</span>'
+        + '<span title="填写 OpenAI 兼容接口根地址，通常填到 /v1 或 /api/v3 为止，不要填写完整的 /chat/completions。" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:#e2e8f0;color:#475569;font-size:12px;cursor:help;">?</span>'
+        + '</div>'
+        + '<input id="_am_url" placeholder="例：https://ark.cn-beijing.volces.com/api/v3" style="padding:10px 14px;border:1px solid #ddd;border-radius:6px;font-size:14px;">'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:6px;">'
+        + '<div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#334155;">'
+        + '<span>模型名称</span>'
+        + '<span title="填写服务商后台里的实际模型 ID，不是随便写的展示名称。" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;background:#e2e8f0;color:#475569;font-size:12px;cursor:help;">?</span>'
+        + '</div>'
+        + '<input id="_am_model" placeholder="例：doubao-1-5-pro-32k-250115" style="padding:10px 14px;border:1px solid #ddd;border-radius:6px;font-size:14px;">'
+        + '</div>'
+        + '<div style="padding:12px 14px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;color:#475569;font-size:13px;line-height:1.7;">'
+        + '<div style="font-weight:600;color:#334155;margin-bottom:6px;">填写参考</div>'
+        + '<div>1. 配置名称：随便起，方便你自己区分，例如“火山方舟”“DeepSeek”“OpenAI”。</div>'
+        + '<div>2. API Key：填写服务商给你的密钥。</div>'
+        + '<div>3. Base URL：填写 OpenAI 兼容接口根地址，通常填到 <code>/v1</code> 或 <code>/api/v3</code> 为止，不要填写完整的 <code>/chat/completions</code>。</div>'
+        + '<div>4. 模型名称：填写服务商后台里的实际模型 ID，不是随便写的展示名。</div>'
+        + '<div style="margin-top:6px;color:#0f766e;">示例：如果完整地址是 <code>https://ark.cn-beijing.volces.com/api/v3/chat/completions</code>，这里应填写 <code>https://ark.cn-beijing.volces.com/api/v3</code>。</div>'
+        + '</div>'
+        + '</div>';
+      var confirmed = await showConfirm(html, '新增接口配置方案');
+      if (!confirmed) return;
+      var nameEl = document.getElementById('_am_name');
+      var keyEl = document.getElementById('_am_key');
+      var urlEl = document.getElementById('_am_url');
+      var modelEl = document.getElementById('_am_model');
+      var name = nameEl ? nameEl.value.trim() : '';
+      var key = keyEl ? keyEl.value.trim() : '';
+      var url = urlEl ? urlEl.value.trim() : '';
+      var model = modelEl ? modelEl.value.trim() : '';
+      if (!name || !key || !url || !model) { await showAlert('配置名称、API Key、Base URL、模型名称不能为空', 'error'); return; }
+      var normalizedUrl = url.replace(/\/+$/, '');
+      var finalUrl = normalizedUrl;
+      if (/\/chat\/completions$/i.test(normalizedUrl)) {
+        finalUrl = normalizedUrl.replace(/\/chat\/completions$/i, '');
+        if (urlEl) urlEl.value = finalUrl;
+        await showAlert('你填写的是完整的 /chat/completions 地址，系统已自动帮你修正为接口根地址：' + finalUrl, 'success');
+      }
+      var token = localStorage.getItem('auth_token');
+      try {
+        var resp = await fetch('/api/models', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name, api_key: key, base_url: finalUrl, model: model })
+        });
+        var data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || '添加失败');
+        await showAlert('配置方案已保存', 'success');
+        loadModels();
+      } catch(e) { await showAlert(e.message || '添加失败', 'error'); }
+    });
+
+    // 增强下拉框交互效果 
+    document.addEventListener('DOMContentLoaded', function() {
+      const selects = document.querySelectorAll('.form-group select');
+      
+      selects.forEach(select => {
+        // 添加焦点动画
+        select.addEventListener('focus', function() {
+          this.style.transform = 'translateY(-2px)';
+        });
+        
+        select.addEventListener('blur', function() {
+          this.style.transform = 'translateY(0)';
+        });
+        
+        // 添加选择后的反馈
+        select.addEventListener('change', function() {
+          this.style.animation = 'selectPulse 0.3s ease';
+          setTimeout(() => {
+            this.style.animation = '';
+          }, 300);
+        });
+      });
+      
+      // 添加动画关键帧
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes selectPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.02); }
+        }
+      `;
+      document.head.appendChild(style);
+    });
+
+    document.getElementById('createForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var msg = document.getElementById('formMessage');
+      var btn = document.getElementById('submitBtn');
+      msg.className = 'form-message loading';
+      msg.textContent = '正在创建…';
+      msg.style.display = 'block';
+      btn.disabled = true;
+
+      if (!document.getElementById('provider').value) {
+        msg.className = 'form-message error';
+        msg.textContent = '请先新增并选择一个接口配置方案';
+        msg.style.display = 'block';
+        btn.disabled = false;
+        return;
+      }
+
+      var payload = {
+        user_idea: document.getElementById('user_idea').value.trim(),
+        total_episodes: parseInt(document.getElementById('total_episodes').value, 10) || 80,
+        target_audience: document.getElementById('target_audience').value,
+        batch_size: parseInt(document.getElementById('batch_size').value, 10) || 5,
+        sample_strategy: document.getElementById('sample_strategy').value,
+        provider: document.getElementById('provider').value,
+        checkpoint_after_ideation: true  // 默认开启卡点
+      };
+
+      var apiBase = window.location.origin;
+      var token = localStorage.getItem('auth_token');
+      fetch(apiBase + '/api/projects', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify(payload)
+      })
+        .then(function (res) {
+          if (res.status === 401) {
+            localStorage.removeItem('auth_token');
+            window.location.href = '/login.html';
+            throw new Error('未授权访问');
+          }
+          if (!res.ok) return res.json().then(function (d) { throw new Error(d.detail || '创建失败'); });
+          return res.json();
+        })
+        .then(function (data) {
+          msg.className = 'form-message success';
+          msg.textContent = '已创建，正在跳转到项目详情…';
+          window.location.href = '/detail.html?id=' + encodeURIComponent(data.project_id);
+        })
+        .catch(function (err) {
+          msg.className = 'form-message error';
+          msg.textContent = err.message || '创建失败，请重试';
+          btn.disabled = false;
+        });
+    });
+  </script>
+</body>
+</html>

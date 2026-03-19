@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 专业级标准化格式剧本生成</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Poppins:wght@400;500;600&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/css/main.css" rel="stylesheet">
+  <style>
+    /* 确保header固定在顶部 */
+    #header {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 1000 !important;
+    }
+    
+    /* 为main添加顶部padding，避免被header遮挡 */
+    .main {
+      padding-top: 120px !important;
+    }
+  </style>
+</head>
+<body class="index-page">
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="#" class="logo d-flex align-items-center">
+        <h1 class="sitename">专业级标准化格式剧本生成</h1>
+      </a>
+    </div>
+  </header>
+
+  <main class="main">
+    <section id="login" class="contact section light-background">
+      <div class="container section-title" data-aos="fade-up">
+        <span class="subtitle">Login</span>
+        <h2>欢迎使用</h2>
+        <p>登录或注册账号，开始创作你的短剧剧本</p>
+      </div>
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <div class="form-wrapper">
+              <div class="form-header">
+                <h3 id="formTitle">登录</h3>
+              </div>
+
+              <form id="loginForm" class="create-form">
+                <div id="formMessage" class="form-message" role="alert"></div>
+
+                <div class="form-group">
+                  <label for="username">用户名</label>
+                  <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    placeholder="请输入用户名" 
+                    required 
+                    autocomplete="off"
+                  >
+                </div>
+
+                <div class="form-group">
+                  <label for="password">密码</label>
+                  <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="请输入密码（至少 4 位）" 
+                    required 
+                    autocomplete="off"
+                  >
+                </div>
+
+                <button type="submit" class="submit-btn" id="loginBtn">
+                  <span>登录</span>
+                  <i class="bi bi-arrow-right"></i>
+                </button>
+
+                <div style="text-align:center;margin-top:14px;font-size:14px;color:#64748b;">
+                  <span id="switchHint">没有账号？</span>
+                  <a href="#" id="switchMode" style="color:#0f766e;text-decoration:underline;margin-left:4px;">去注册</a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer" class="footer dark-background">
+    <div class="container copyright text-center mt-4">
+      <p>© <span>2026</span> <strong class="px-1 sitename">短剧剧本</strong> <span>AIGC 多智能体协作</span></p>
+    </div>
+  </footer>
+
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/js/modal.js"></script>
+  <script>
+    AOS.init({ duration: 600, easing: 'ease-in-out', once: true, mirror: false });
+
+    // 检查URL中是否有token参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('token');
+    
+    if (urlToken) {
+      verifyToken(urlToken);
+    }
+
+    // 检查是否已登录
+    const savedToken = localStorage.getItem('auth_token');
+    if (savedToken && !urlToken) {
+      verifyToken(savedToken);
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('formMessage');
+      const loginBtn = document.getElementById('loginBtn');
+      
+      if (!username) {
+        msg.className = 'form-message error';
+        msg.textContent = '请输入用户名';
+        msg.style.display = 'block';
+        return;
+      }
+      if (!password || password.length < 4) {
+        msg.className = 'form-message error';
+        msg.textContent = '请输入密码（至少 4 位）';
+        msg.style.display = 'block';
+        return;
+      }
+
+      msg.style.display = 'none';
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<span>验证中...</span><i class="bi bi-hourglass-split"></i>';
+
+      try {
+        var isRegister = window._authMode === 'register';
+        var apiUrl = isRegister ? '/api/auth/register' : '/api/auth/login';
+        var payload = isRegister
+          ? { username: username, password: password }
+          : { username: username, password: password };
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          localStorage.setItem('auth_token', data.token);
+          msg.className = 'form-message success';
+          msg.textContent = isRegister ? '注册成功，正在跳转...' : '登录成功，正在跳转...';
+          msg.style.display = 'block';
+          
+          setTimeout(() => {
+            window.location.href = '/projects';
+          }, 500);
+        } else {
+          msg.className = 'form-message error';
+          msg.textContent = (data && (data.detail || data.message)) || '操作失败，请重试';
+          msg.style.display = 'block';
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = isRegister
+            ? '<span>注册</span><i class="bi bi-arrow-right"></i>'
+            : '<span>登录</span><i class="bi bi-arrow-right"></i>';
+        }
+      } catch (error) {
+        msg.className = 'form-message error';
+        msg.textContent = '网络错误，请稍后重试';
+        msg.style.display = 'block';
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<span>登录</span><i class="bi bi-arrow-right"></i>';
+      }
+    });
+
+    // 登录/注册模式切换
+    window._authMode = 'login';
+    document.getElementById('switchMode').addEventListener('click', function(e) {
+      e.preventDefault();
+      var title = document.getElementById('formTitle');
+      var btn = document.getElementById('loginBtn');
+      var hint = document.getElementById('switchHint');
+      var link = document.getElementById('switchMode');
+      var msg = document.getElementById('formMessage');
+      msg.style.display = 'none';
+      if (window._authMode === 'login') {
+        window._authMode = 'register';
+        title.textContent = '注册';
+        btn.innerHTML = '<span>注册</span><i class="bi bi-arrow-right"></i>';
+        hint.textContent = '已有账号？';
+        link.textContent = '去登录';
+      } else {
+        window._authMode = 'login';
+        title.textContent = '登录';
+        btn.innerHTML = '<span>登录</span><i class="bi bi-arrow-right"></i>';
+        hint.textContent = '没有账号？';
+        link.textContent = '去注册';
+      }
+    }); 
+
+    async function verifyToken(token) {
+      const msg = document.getElementById('formMessage');
+      const loginBtn = document.getElementById('loginBtn');
+      
+      msg.className = 'form-message loading';
+      msg.textContent = '正在验证...';
+      msg.style.display = 'block';
+      if (loginBtn) loginBtn.disabled = true;
+
+      try {
+        const response = await fetch('/api/auth/verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.valid) {
+          localStorage.setItem('auth_token', token);
+          window.location.href = '/projects';
+        } else {
+          localStorage.removeItem('auth_token');
+          msg.style.display = 'none';
+          if (loginBtn) loginBtn.disabled = false;
+          if (urlToken) {
+            msg.className = 'form-message error';
+            msg.textContent = '登录已失效，请重新登录';
+            msg.style.display = 'block';
+          }
+        }
+      } catch (error) {
+        localStorage.removeItem('auth_token');
+        msg.style.display = 'none';
+        if (loginBtn) loginBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

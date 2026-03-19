@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的剧本项目 - 专业级标准化格式剧本生成</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Poppins:wght@400;500;600&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link href="assets/css/main.css" rel="stylesheet">
+  <style>
+    /* 确保header固定在顶部 */
+    #header {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 1000 !important;
+    }
+    
+    /* 为main添加顶部padding，避免被header遮挡 */
+    .main {
+      padding-top: 120px !important;
+    }
+  </style>
+</head>
+<body class="index-page">
+  <header id="header" class="header d-flex align-items-center fixed-top">
+    <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+      <a href="/projects" class="logo d-flex align-items-center">
+        <h1 class="sitename">专业级标准化格式剧本生成</h1>
+      </a>
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="/projects" class="active">项目</a></li>
+          <li><a href="/create">新建</a></li>
+          <li><a href="#" onclick="localStorage.removeItem('auth_token');window.location.href='/login.html';return false;" style="color:#dc3545;">退出</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <section id="projects" class="portfolio section">
+      <div class="container section-title" data-aos="fade-up">
+        <span class="subtitle">Projects</span>
+        <h2>我的剧本项目</h2>
+        <p>按专业级、标准化格式生成短剧剧本</p>
+      </div>
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <!-- 自动刷新，无需手动操作 -->
+        <div class="mb-4"></div>
+
+        <div class="row gy-5 isotope-container" id="projectsContainer" data-aos="fade-up" data-aos-delay="200">
+          <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">加载中...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="portfolio-conclusion" data-aos="fade-up" data-aos-delay="400" style="display:none;" id="emptyState">
+          <div class="conclusion-content">
+            <h4>还没有项目</h4>
+            <p>点击“新建”先选择已配置的接口方案，再开始创建第一个剧本项目</p>
+            <div class="conclusion-actions">
+              <a href="/create" class="primary-action">
+                开始创作
+                <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer" class="footer dark-background">
+    <div class="container copyright text-center mt-4">
+      <p>© <span>2026</span> <strong class="px-1 sitename">短剧剧本</strong> <span>AIGC 多智能体协作</span></p>
+    </div>
+  </footer>
+
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/js/modal.js"></script>
+  <script>
+    // Token验证
+    function checkAuth() {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        window.location.href = '/login.html';
+        return false;
+      }
+      return true;
+    }
+    
+    // 页面加载时验证token
+    if (!checkAuth()) {
+      throw new Error('未授权访问');
+    }
+    
+    AOS.init({ duration: 600, easing: 'ease-in-out', once: true, mirror: false });
+
+    async function loadProjects() {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch('/api/projects', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (res.status === 401) {
+          localStorage.removeItem('auth_token');
+          window.location.href = '/login.html';
+          return;
+        }
+        if (!res.ok) throw new Error('加载失败');
+        const projects = await res.json();
+        
+        const container = document.getElementById('projectsContainer');
+        const emptyState = document.getElementById('emptyState');
+        
+        if (!projects || projects.length === 0) {
+          container.innerHTML = '';
+          emptyState.style.display = 'block';
+          return;
+        }
+        
+        emptyState.style.display = 'none';
+        container.innerHTML = projects.map((p, index) => {
+          // 状态标签映射（添加checkpoint状态）
+          const statusMap = { 
+            pending: '待开始', 
+            running: '生成中', 
+            paused: '已暂停', 
+            completed: '已完成', 
+            failed: '失败',
+            checkpoint: '待审核'
+          };
+          const statusLabel = statusMap[p.status] || p.status || '未知';
+          
+          const progress = p.total_episodes > 0 ? Math.round((p.current_episode / p.total_episodes) * 100) : 0;
+          const created = new Date(p.created_at).toLocaleString('zh-CN', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          });
+          
+          // 标题显示逻辑
+          let displayTitle = p.title || '生成中...';
+          
+          // 左侧卡片显示：如果有标题就显示标题前2-3个字，否则显示项目ID的前3个字符
+          let cardDisplay = '';
+          if (p.title && p.title !== '生成中...') {
+            // 显示标题的前2-3个字
+            cardDisplay = p.title.substring(0, 3);
+          } else {
+            // 显示项目ID的前3个字符
+            cardDisplay = (p.id || '').substring(0, 3).toUpperCase();
+          }
+          
+          return `
+            <div class="col-lg-12 portfolio-item isotope-item">
+              <article class="portfolio-card">
+                <div class="row g-4 align-items-center">
+                  <div class="col-md-3">
+                    <div class="project-visual" style="height: 200px; background: linear-gradient(135deg, var(--accent-color), #555); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: bold; padding: 20px; text-align: center; line-height: 1.2; word-break: break-all;">
+                      ${cardDisplay}
+                    </div>
+                  </div>
+                  <div class="col-md-9">
+                    <div class="project-details">
+                      <div class="project-header mb-3">
+                        <span class="project-category">${p.target_audience || '通用'}</span>
+                        <time class="project-year">${created}</time>
+                      </div>
+                      <h3 class="project-title">${displayTitle}</h3>
+                      <p class="project-description">${(p.user_idea || '').substring(0, 120)}${(p.user_idea || '').length > 120 ? '...' : ''}</p>
+                      <div class="project-meta mb-3">
+                        <span class="client-name">${statusLabel}</span>
+                        <div class="project-scope">
+                          <span class="scope-item">${p.current_episode}/${p.total_episodes} 集</span>
+                          <span class="scope-item">${progress}%</span>
+                        </div>
+                      </div>
+                      <div class="progress mb-3" style="height: 8px; background: rgba(102,102,102,0.1); border-radius: 4px;">
+                        <div class="progress-bar" style="width: ${progress}%; background: var(--accent-color); border-radius: 4px;"></div>
+                      </div>
+                      <div class="d-flex gap-2">
+                        <a href="/detail.html?id=${p.id}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--accent-color); color: var(--contrast-color); text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500;">
+                          <i class="bi bi-folder-open"></i> 查看
+                        </a>
+                        ${p.status === 'completed' ? `<button type="button" class="btn-export-project btn-outline" data-project-id="${String(p.id).replace(/"/g, '&quot;')}" data-project-title="${String(p.title || '短剧剧本').replace(/"/g, '&quot;')}" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: transparent; color: var(--heading-color); border: 1px solid rgba(102,102,102,0.2); border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                          <i class="bi bi-download"></i> 导出
+                        </button>` : ''}
+                        <button onclick="deleteProject('${p.id}')" class="btn-outline" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: transparent; color: #dc3545; border: 1px solid rgba(220,53,69,0.3); border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                          <i class="bi bi-trash"></i> 删除
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          `;
+        }).join('');
+        
+        // 检查是否需要自动刷新
+        checkAndStartAutoRefresh(projects);
+      } catch (err) {
+        document.getElementById('projectsContainer').innerHTML = `<div class="col-12 alert alert-danger">加载失败: ${err.message}</div>`;
+        await showAlert('加载项目列表失败，请刷新页面重试', 'error');
+      }
+    }
+
+    // 自动刷新控制
+    let autoRefreshInterval = null;
+    
+    function checkAndStartAutoRefresh(projects) {
+      const hasRunning = projects.some(p => p.status === 'running');
+      
+      if (hasRunning && !autoRefreshInterval) {
+        // 启动自动刷新（每5秒）
+        autoRefreshInterval = setInterval(async () => {
+          await loadProjects();
+        }, 5000);
+        console.log('✅ 启动自动刷新（有项目生成中）');
+      } else if (!hasRunning && autoRefreshInterval) {
+        // 停止自动刷新
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+        console.log('⏸️ 停止自动刷新（无项目生成中）');
+      }
+    }
+
+    async function refreshProjects() {
+      document.getElementById('projectsContainer').innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
+      await loadProjects();
+    }
+
+    async function exportProject(projectId, projectTitle) {
+      const loading = showLoading('正在打包剧本文件...');
+      const token = localStorage.getItem('auth_token');
+      const doFetch = function() {
+        const ctrl = new AbortController();
+        const t = setTimeout(function() { ctrl.abort(); }, 120000);
+        return fetch('/api/projects/' + projectId + '/export', {
+          headers: { 'Authorization': 'Bearer ' + token },
+          signal: ctrl.signal
+        }).finally(function() { clearTimeout(t); });
+      };
+      try {
+        var response = await doFetch();
+        if (response.ok) {
+          var blob = await response.blob();
+          var url = window.URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = (projectTitle || '短剧剧本') + '_' + projectId + '.docx';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          await showAlert('导出成功', 'success');
+        } else {
+          var msg = '导出失败，请稍后重试';
+          try {
+            var text = await response.text();
+            var err = text ? (function() { try { return JSON.parse(text); } catch(e) { return {}; } })() : {};
+            if (err.detail) msg = typeof err.detail === 'string' ? err.detail : String(err.detail);
+          } catch (e) {}
+          await showAlert(msg, 'error');
+        }
+      } catch (error) {
+        if (error && error.name === 'AbortError') {
+          await showAlert('导出超时（超过2分钟），请检查网络或稍后重试', 'error');
+        } else {
+          try {
+            var retryRes = await doFetch();
+            if (retryRes && retryRes.ok) {
+              var blob2 = await retryRes.blob();
+              var url2 = window.URL.createObjectURL(blob2);
+              var a2 = document.createElement('a');
+              a2.href = url2;
+              a2.download = (projectTitle || '短剧剧本') + '_' + projectId + '.docx';
+              document.body.appendChild(a2);
+              a2.click();
+              window.URL.revokeObjectURL(url2);
+              document.body.removeChild(a2);
+              await showAlert('导出成功', 'success');
+              return;
+            }
+          } catch (e2) {}
+          await showAlert('导出失败: ' + (error && error.message ? error.message : String(error)) + '。请检查网络连接或稍后重试', 'error');
+        }
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function deleteProject(id) {
+      const confirmed = await showConfirm('此操作不可恢复，确定要删除这个项目吗？', '删除项目');
+      if (!confirmed) return;
+      
+      const loading = showLoading('正在删除...');
+      
+      try {
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch(`/api/projects/${id}`, { 
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        hideLoading();
+        
+        if (res.status === 401) {
+          localStorage.removeItem('auth_token');
+          window.location.href = '/login.html';
+          return;
+        }
+        if (!res.ok) throw new Error('删除失败');
+        
+        await showAlert('项目已成功删除', 'success');
+        await loadProjects();
+      } catch (err) {
+        hideLoading();
+        await showAlert('删除失败: ' + err.message, 'error');
+      }
+    }
+
+    // 列表页「导出」与详情页用同一套逻辑：点导出按钮时调 exportProject
+    document.getElementById('projectsContainer').addEventListener('click', function(e) {
+      const btn = e.target.closest('.btn-export-project');
+      if (!btn) return;
+      e.preventDefault();
+      exportProject(btn.dataset.projectId, btn.dataset.projectTitle);
+    });
+
+    // 页面卸载时清除定时器
+    window.addEventListener('beforeunload', () => {
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+      }
+    });
+
+    loadProjects();
+  </script>
+</body>
+</html>
