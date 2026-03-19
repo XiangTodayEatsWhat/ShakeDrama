@@ -1,4 +1,4 @@
-# Professional Drama Script Generator
+# 剧擎：专业级短剧剧本生成
 
 面向短剧创作的分阶段剧本生成工具。
 
